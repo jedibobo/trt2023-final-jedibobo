@@ -120,39 +120,68 @@ python3 summarize.py --engine_dir trt_engine/galactica-125m/fp16/1-gpu \
 ```
 
 ## Result
-### output of the model
-The output of llm is: (How ridiculous...)
+### output of the model(The more params the better!)
+The output of Galactica-125m is: 
 TRT_LLM output
 ```
-Summary : [[' "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Crive, "Cri']]
+Summary : [[' "I\'ve never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who has never seen a person who']]
 ```
 HF_MODEL output (This will improve when the param increases, I have tested 1.3b, it's obviously better.)
 ```
 Summary : [[' "I\'m a very good actor, and I\'m a very good actor."\n\n## Personal life\n\n Best was married to actress and singer-songwriter, Rosco P. Coltrane, in 1948. They had two children, James and Rosco.\n\n## External links\n\n* James Best at IMDb\n* James Best at Find a Grave\n\n']]
 ```
 
+The output of Galactica-1.3b is: 
+TRT_LLM output
+```
+Summary : [[' "The Dukes of Hazzard" was a hit show for 26 years, and it\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit']]
+```
+HF_MODEL output (This will improve when the param increases, I have tested 1.3b, it's obviously better.)
+```
+Summary : [[' "The Dukes of Hazzard" was a hit show for 26 years, and James Best was a star. But he died in 2015, and his character will live on in reruns.']]
+```
+
+The output of Galactica-6.7b(**unable to run on A10**) is: 
+TRT_LLM output
+```
+Summary : [[' James Best, best known for his portrayal of bumbling sheriff Rosco P. Coltrane on TV\'s "The Dukes of Hazzard," died Monday after a brief illness. He was 88. Best died in hospice in Hickory, North Carolina, of complications from pneumonia, said Steve Latshaw, a longtime friend and Hollywood colleague. Although he\'d been a busy actor for decades in theater and in Hollywood,']]
+```
+HF_MODEL output (This will improve when the param increases, I have tested 1.3b, it's obviously better.)
+```
+Summary : [[' James Best, best known for his portrayal of bumbling sheriff Rosco P. Coltrane on TV\'s "The Dukes of Hazzard," died Monday after a brief illness. He was 88. Best died in hospice in Hickory, North Carolina, of complications from pneumonia, said Steve Latshaw, a longtime friend and Hollywood colleague. Although he\'d been a busy actor for decades in theater and in Hollywood,']]
+```
+
 
 ### Metrics
+125M results are shown below:
+for 6.7B model(rouge1 rouge1 : 19.116646730129816), it almost touches limit of rouge1>20.
 ```
-[09/19/2023-08:45:48] [TRT-LLM] [I] TensorRT-LLM (total latency: 3.5248897075653076 sec)
-[09/19/2023-08:45:48] [TRT-LLM] [I] TensorRT-LLM beam 0 result
-[09/19/2023-08:45:49] [TRT-LLM] [I]   rouge1 : 2.4951468751395955
-[09/19/2023-08:45:49] [TRT-LLM] [I]   rouge2 : 0.0
-[09/19/2023-08:45:49] [TRT-LLM] [I]   rougeL : 2.476452405491556
-[09/19/2023-08:45:49] [TRT-LLM] [I]   rougeLsum : 2.522421130912537
-[09/19/2023-08:45:49] [TRT-LLM] [I] Hugging Face (total latency: 10.462498426437378 sec)
-[09/19/2023-08:45:49] [TRT-LLM] [I] HF beam 0 result
-[09/19/2023-08:45:49] [TRT-LLM] [I]   rouge1 : 11.029703712283155
-[09/19/2023-08:45:49] [TRT-LLM] [I]   rouge2 : 1.7302256076234355
-[09/19/2023-08:45:49] [TRT-LLM] [I]   rougeL : 8.42338520559755
-[09/19/2023-08:45:49] [TRT-LLM] [I]   rougeLsum : 10.437959123452638
+[09/19/2023-12:52:13] [TRT-LLM] [I] TensorRT-LLM (total latency: 3.6322696208953857 sec)
+[09/19/2023-12:52:13] [TRT-LLM] [I] TensorRT-LLM beam 0 result
+[09/19/2023-12:52:13] [TRT-LLM] [I]   rouge1 : 10.277576407234886
+[09/19/2023-12:52:13] [TRT-LLM] [I]   rouge2 : 1.6005120808715905
+[09/19/2023-12:52:13] [TRT-LLM] [I]   rougeL : 8.08101934142795
+[09/19/2023-12:52:13] [TRT-LLM] [I]   rougeLsum : 9.833098488425106
+[09/19/2023-12:52:13] [TRT-LLM] [I] Hugging Face (total latency: 10.479159355163574 sec)
+[09/19/2023-12:52:13] [TRT-LLM] [I] HF beam 0 result
+[09/19/2023-12:52:14] [TRT-LLM] [I]   rouge1 : 11.029703712283155
+[09/19/2023-12:52:14] [TRT-LLM] [I]   rouge2 : 1.7302256076234355
+[09/19/2023-12:52:14] [TRT-LLM] [I]   rougeL : 8.42338520559755
+[09/19/2023-12:52:14] [TRT-LLM] [I]   rougeLsum : 10.437959123452638
 ```
 ### Speed-up Ratio
+For Galactica-125M, the speed-up is 2.885 on A10 Ali cloud machine.
 ```
-TensorRT-LLM (total latency: 3.502703905105591 sec)
-Hugging Face (total latency: 10.469577312469482 sec)
+TensorRT-LLM (total latency: 3.6322696208953857 sec)
+Hugging Face (total latency: 10.479159355163574 sec)
 ```
-The speed-up is 2.989 on A40 Ali cloud machine.
+
+For Galactica-1.3B, the speed-up is 1.314 on A10 Ali cloud machine.
+```
+TensorRT-LLM (total latency: 14.435588836669922 sec)
+Hugging Face (total latency: 18.968894243240356 sec)
+```
+
 
 ### Problem
 Currently, I am not capable of and lack time of debugging like those scripts in [**tests**](../../tests/model/test_gpt_e2e.py) dir 
