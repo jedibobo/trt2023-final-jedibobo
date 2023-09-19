@@ -1,0 +1,47 @@
+# /tensorrt_llm_july-release-v1/cpp/build/*
+# /tensorrt_llm_july-release-v1/build/*
+# /3rdparty
+# /tensorrt_llm_july-release-v1/cpp/tensorrt_llm/kernels/contextFusedMultiHeadAttention/cubin
+
+# C++
+# 忽略编译生成的文件
+*.o
+*.a
+*.so
+
+# 忽略 CMake 文件
+CMakeFiles/
+CMakeCache.txt
+
+# 忽略 IDE 项目文件 
+.vscode/
+.idea/
+
+# Python
+# 忽略缓存文件
+__pycache__/
+*.py[cod]
+
+# 忽略 virtualenv
+venv/
+
+# 忽略配置文件
+.env
+
+# 忽略日志文件
+*.log
+
+# 忽略数据集
+datasets/
+
+# 通用
+# 忽略操作系统生成的文件
+.DS_Store
+Thumbs.db
+
+# 忽略 vim 临时文件
+*.swp
+*.swo
+
+# 忽略用户设置
+.settings/
