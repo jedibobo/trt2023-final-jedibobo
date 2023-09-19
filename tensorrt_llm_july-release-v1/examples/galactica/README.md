@@ -148,8 +148,11 @@ Summary : [[' "I\'m a very good actor, and I\'m a very good actor."\n\n## Person
 [09/19/2023-08:45:49] [TRT-LLM] [I]   rougeLsum : 10.437959123452638
 ```
 ### Speed-up Ratio
+```
+TensorRT-LLM (total latency: 3.502703905105591 sec)
+Hugging Face (total latency: 10.469577312469482 sec)
+```
+The speed-up is 2.989 on A40 Ali cloud machine.
 
-
-
-
+### Problem
 Currently, I am not capable of and lack time of debugging like those scripts in [**tests**](../../tests/model/test_gpt_e2e.py) dir 
