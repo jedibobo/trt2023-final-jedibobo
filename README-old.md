@@ -6,6 +6,34 @@ TensorRT-LLM是对TensorRT的再封装。它改善了TensorRT模型的手工搭�
   + TensorRT-LLM现在没有ONNX parser，所以不能走ONNX workflow，必须手工搭建模型。
   + 大家拿到的TensorRT-LLM只是一个非公开的预览版本。在使用过程中可能会遇到一些问题，比如没有支持完善的feature。英伟达正在开发完善它。
 
+英伟达非常感谢选手们的参与和投入。我们深知比赛的奖金有限，与选手们的付出不成比例，但是会精心组织赛程与评选，努力让比赛更有意义。
+
+# 复赛赛题
++ 请选手自选大型语言模型，并使用 TensorRT 或 TensorRT-LLM 进行模型推理优化。我们鼓励大家使用TensorRT-LLM，使用TensorRT-LLM 更有得分优势（详细见“评分标准”）。 
++ 每队将获得一台云主机（包含一张 NVIDIA A10 GPU）用于比赛。因此，请选择能够在一张 A10 上跑起来的模型。
++ 为了让选手的工作可被他人参考，**您的代码需要开源**，开源协议可以视需要自行选择。
+
+## 需要提交的内容 
+要求选手提交的内容主要为代码与报告。
+### 要提交的代码 
++ 选手要提交的代码需要在我们给定的docker中顺利运行。我们已经在云主机中预装了docker镜像：
+    - 镜像名为: registry.cn-hangzhou.aliyuncs.com/trt-hackathon/trt-hackathon:final_v1
+    - TensorRT 9.0 EA 安装目录为: /usr/local/TensorRT-9.0.0.2
+    - TensorRT-LLM 代码目录为 /root/workspace/tensorrt_llm_july-release-v1
+####  如果使用 TensorRT-LLM
+  TensorRT-LLM 在docker中已经构建并且安装好了。TensorRT-LLM 中已经实现了一些模型（见 /root/workspace/tensorrt_llm_july-release-v1/examples，以后简称“examples目录”）。请选手仔细阅读代码中包含的 README 文件，直接进入examples目录跑各个现有模型（一些模型需要的.pth 与python 包还仍然要按照模型folder下面的README 进行下载与安装）。在选手理解TensorRT-LLM的用法之后，进行开发工作。
+  特别说明：
+  - 请将/root/workspace里面的内容上传到自己的代码repo上。
+  - 请把新开发的代码都放置于/root/workspace/tensorrt_llm_july-release-v1代码目录树下。
+  - 请在/root/workspace/README.MD中写报告，从而你的报告将成为repo的主页。
+  - 如果安装新的库与依赖，请写好安装脚本，并在报告中说明。
+  - **请在比赛结束前维持repo的个人可见状态**。请注意，**先commit原始TensorRT-LLM代码**，然后再做进一步开发，以方便比较代码更改。
+#### 如果使用 TensorRT 
+  如果使用TensorRT，请选手提供从原始模型出发，直到运行优化好的 TensorRT 模型，全过程所需的所有脚本及代码到代码repo上面，将其开源出来。
+### 要提交的报告
+  - 要用固定的模板、以 markdown 的形式发布在代码仓库根目录的 README.md 里面。
+  - 报告的模板在本文的末尾
+
 ## 评分标准
 + TensorRT-LLM 试用送分题：为了鼓励选手试用TensorRT-LLM，无论选手选择 TensorRT 还是 TensorRT-LLM 来做优化，完成送分题都能得分
   - 请在报告中写出 /root/workspace/tensorrt_llm_july-release-v1/examples/gpt/README 里面 “Single node, single GPU” 部分如下命令的输出（10分）[模型为gpt2-medium](https://huggingface.co/gpt2-medium)
@@ -42,89 +70,36 @@ TensorRT-LLM是对TensorRT的再封装。它改善了TensorRT模型的手工搭�
 + 初赛得分
   - 初赛原始得分除以100取整计入复赛。
 
++ 复赛结束后，英伟达将组织至少7名专家，基于上述标准对每个复赛选手评分，取所有专家的平均分作为该选手的最终成绩。
 
-## 总述
-本项目主要贡献在于：使用Nvidia即将发布的TensorRT_LLM工具，对Galactica系列模型([paper](https://arxiv.org/abs/2211.09085)) ([website](https://galactica.org/)) ([official-demo](https://galactica.org/explore/)) ([huggingface-model](https://huggingface.co/facebook/galactica-6.7b))进行推理优化，具体选题内容为：用TensorRT-LLM实现新模型。
+## 优化报告的模板
 
-### Galactica模型简单介绍
-```
-Galactica models are trained on a large corpus comprising more than 360 millions in-context citations and over 50 millions of unique references normalized across a diverse set of sources. This enables Galactica to suggest citations and help discover related papers.
-```
-Galactica大型语言模型（LLM）正在用数百万条学术内容进行训练。它的目的是帮助研究界更好地管理"信息爆炸"。Galactica是由Meta AI与Papers with Code合作开发的。该团队认为信息过载是科学进步的一个主要障碍。"研究人员被埋没在大量的论文中，越来越无法区分有意义的和无意义的"。简单来讲，就是聚合有意义的内容，简直是我等科研狗的福音。
+大赛要求用统一模板写报告，是为了让所有报告都有共同的行文结构，方便评审。同时，本模板也尽量考虑实用性，让它可以称职地成为代码项目的主页说明书。
+我们希望同学们用心打造这份报告。但愿这份报告就像一份TensorRT入门教程那样，通过一个具体的例子，详细介绍从原始模型到优化模型的全工作流程，从而传授经验，给人启发。
 
-### Galactica模型的特点
-```
-Architecture
-Galactica uses a Transformer architecture in a decoder-only setup (Vaswani et al., 2017), with the following
-modifications:
-• GeLU Activation - we use GeLU activations for all model sizes (Hendrycks and Gimpel, 2016).
-• Context Window - we use a 2048 length context window for all model sizes.
-• No Biases - following PaLM, we do not use biases in any of the dense kernels or layer norms (Chowdhery
-et al., 2022).
-• Learned Positional Embeddings - we use learned positional embeddings for the model. We experimented
-with ALiBi at smaller scales but did not observe large gains, so we did not use it (Press et al.,
-2021).
-• Vocabulary - we construct a vocabulary of 50k tokens using BPE (Sennrich et al., 2015). The
-vocabulary was generated from a randomly selected 2% subset of the training data.
-```
-总结下来：
-- Decoder-only结构，和GPT2等等都很相似 
-- GeLU激活函数
-- 2048长度的context window
-- 没有偏置项（在推理搭建模型时很容易忽略的一点）
-- 使用了学习的位置编码（Learned Positional Embeddings）
-- 使用了BPE词表
+以下为模板具体内容。
 
-### 优化效果
-在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。
-具体的优化和输出结果，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
-### 在docker里编译运行的完整步骤
-有些部分需要科学上网，因此我这边需要两个命令行
-#### 命令行1
-```shell
-cd /root/clash-linx/
-./clash-linux-amd64-v3-v1.18.0 -f Config.yaml
-```
+---
 
-#### 命令行2
-```shell
-docker start -i hackathon2023
+### 总述
 
-cd /root/workspace/trt2023-final-jedibobo/tensorrt_llm_july-release-v1/examples/galactica/
+请简练地概括项目的主要贡献，使读者可以快速理解并复现你的工作，包括：
 
-sh build_and_run_125m.sh #or sh build_and_run_1.3b.sh
-```
+- 介绍本工作是 [NVIDIA TensorRT Hackathon 2023](https://github.com/NVIDIA/trt-samples-for-hackathon-cn/tree/master/Hackathon2023) 的参赛题目（请给出上述链接），并介绍具体选题是什么（参见“选题得分”小节，应为如下之一：1，2，3，4，2+4，3+4）
+    - 如果是优化新模型，原始模型的名称及链接，并对该模型做个简要介绍
+- 优化效果（例如给出精度和加速比），简单给出关键的数字即可，在这里不必详细展开
+- 在Docker里面代码编译、运行步骤的完整说明
+  - 请做到只要逐行运行你给的命令，就能把代码跑起来
 
-## 主要开发工作
+### 主要开发工作
 
-### 开发工作的难点
-开发中主要攻克的问题：
-- 搞清楚OPT和Galactica的区别，主要在于激活函数、模型参数、无BIAS结构、加载模型参数的方式。
-- 参考LLAMA直接从hf读取模型的方式，编写了独立的[加载参数代码](tensorrt_llm_july-release-v1/examples/galactica/weight.py)，对BIAS全为0的模型特性加以适配。以及利用加载参数函数，编写对应的build.py中的参数加载部分。
-- 参考OPT通过FT格式加载模型参数的流程，借助了其中的config.ini配置文件，成功对模型进行了正确的初始化。
-- 在tensorrt_llm 目录下成功添加对应的模型文件，并可通过pip打包重新安装后利用tensorrt_llm包加载模型结构
+#### 开发工作的难点
 
 请在这一节里总结你的工作难点与亮点。
-
+- 如果使用 TensorRT 进行优化，请介绍一下在模型在导出时、或用polygraphy/trtexec解析时，或在使用TensorRT中，遇到了什么问题并解决了。换句话说，针对这个模型，我们为什么需要额外的工程手段。
 - 如果使用 TensorRT-LLM 进行优化，描述以下方面可供选手参考：如果搭建了新模型， 请介绍模型结构有无特别之处，在模型的搭建过程中使用了什么算子，有没有通过plugin支持的新算子。如果支持新feature，请介绍这个feature具体需要修改哪些模块才能实现。如果优化已有模型，请介绍模型性能瓶颈以及解决方法。另外还可以包含工程实现以及debug过程中的难点。
 
-## 开发与优化过程
-### 一切的开始
-由于本人对NLP一窍不通，在选模型时也十分迷茫，在老师们的知道下在OpenLLM的leaderboard上，通过关键词pretrained筛选，并打开几个链接后，最后选择相信Meta的开源实力，选择了Galactica模型。
-
-但由于对NLP的一无所知，我无法立刻通过论文或者Huggingface模型快速知道模型的结构是否新颖，也造成本工作创新性不足。
-### 终于学会了用transformers加载模型
-后续根据Model Card中Huggingface加载模型的时候，打印出model的结构，发现和OPT的结构非常相似，因此我选择了利用OPT模型结构进行迁移。这里的代码在[code](tensorrt_llm_july-release-v1/examples/galactica/hf_load_inference.py)
-
-### 修改模型阶段(FT流程)
-
-### Debug阶段-发现FT作为中转的代码中有全为0的权重，转向直接加载HF模型
-
-### Debug阶段-对应模型特点的命令行参数修改
-
-### Debug阶段-发现bias被随机初始化
-在我写了一个完整的shell脚本，来作为mento方便复现工作的脚本，多次运行后的现象是随着每一次的编译模型，输出会随之改变。这里我认为是由于bias的随机初始化导致的，因此我在build.py中对bias进行了初始化，结果最终恢复正常。
-
+### 开发与优化过程
 
 这一部分是报告的主体。请把自己假定为老师，为 TensorRT 或 TensorRT-LLM 的初学者讲述如何从原始模型出发，经过一系列开发步骤，得到优化后的 TensorRT 或 TensorRT-LLM 模型。或者你是如何一步步通过修改哪些模块添加了新feature的。
 
@@ -134,7 +109,7 @@ sh build_and_run_125m.sh #or sh build_and_run_1.3b.sh
 - 最好能介绍为什么需要某个特别步骤，通过这个特别步骤解决了什么问题
   - 比如，通过Nsight Systems绘制timeline做了性能分析，发现attention时间占比高且有优化空间（贴图展示分析过程），所以决定要写plugin。然后介绍plugin的设计与实现，并在timeline上显示attention这一部分的性能改进。
 
-## 优化效果
+### 优化效果
 
 这一部分介绍你的工作在云主机上的运行效果。如果是优化模型，需要分两部分说明：
 
@@ -152,7 +127,7 @@ sh build_and_run_125m.sh #or sh build_and_run_1.3b.sh
 - 相关测试代码也需要包含在代码仓库中，可被复现。
 - 请写明云主机的软件硬件环境，方便他人参考。
 
-## Bug报告（可选）
+### Bug报告（可选）
 
 提交bug是对TensorRT/TensorRT-LLM的另一种贡献。发现的TensorRT/TensorRT-LLM或cookbook、或文档和教程相关bug，请提交到[github issues](https://github.com/NVIDIA/trt-samples-for-hackathon-cn/issues)，并请在这里给出链接。  
 
@@ -175,10 +150,10 @@ sh build_and_run_125m.sh #or sh build_and_run_1.3b.sh
   - Additional Notes
     - Provide any additional context here you think might be useful for the TensorRT team to help debug this issue (such as experiments done, potential things to investigate).
 
-## 送分题答案（可选）
+### 送分题答案（可选）
 
 如果你做了送分题，请把答案写在这里。
 
-## 经验与体会（可选）
+### 经验与体会（可选）
 
 欢迎在这里总结经验，抒发感慨。

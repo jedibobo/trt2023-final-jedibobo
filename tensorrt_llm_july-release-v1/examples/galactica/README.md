@@ -4,7 +4,8 @@
 ## Install Requirements and Prepare model
 ### install git lfs in docker
 ```shell
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash # no need sudo in docker with root user
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash 
+# no need sudo in docker with root user
 apt-get install git-lfs
 ```
 
