@@ -90,6 +90,8 @@ cd /root/clash-linx/
 ```shell
 docker start -i hackathon2023
 
+export ALL_PROXY=http://127.0.0.1:7890
+
 cd /root/workspace/trt2023-final-jedibobo/tensorrt_llm_july-release-v1/examples/galactica/
 
 sh build_and_run_125m.sh #or sh build_and_run_1.3b.sh
