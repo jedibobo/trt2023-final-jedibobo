@@ -112,6 +112,7 @@ def load_from_hf_galai(tensorrt_llm_galai,
         elif 'model.decoder.final_layer_norm.weight' in k:
             check_zero_rows_columns(v, identifier=k)
             tensorrt_llm_galai.ln_f.weight.value = v
+            tensorrt_llm_galai.ln_f.bias.value = np.zeros_like(v)
         # elif 'lm_head.weight' in k:
         #     tensorrt_llm_galai.lm_head.weight.value = np.ascontiguousarray(
         #         split(v, tensor_parallel, rank))
@@ -125,10 +126,14 @@ def load_from_hf_galai(tensorrt_llm_galai,
                 continue
             if 'final_layer_norm.weight' in k:
                 tensorrt_llm_galai.layers[idx].post_layernorm.weight.value = v
+                # give all zeros for biases 
+                tensorrt_llm_galai.layers[idx].post_layernorm.bias.value = np.zeros_like(v) 
             elif 'self_attn_layer_norm.weight' in k:
                 dst = tensorrt_llm_galai.layers[idx].input_layernorm.weight
                 dst.value = v
+                tensorrt_llm_galai.layers[idx].input_layernorm.bias.value = np.zeros_like(v) 
             elif 'self_attn.qkv_proj.weight' in k:
+                tensorrt_llm_galai.layers[idx].attention.qkv.bias.value = np.zeros(v.shape[0],dtype=v.dtype)
                 dst = tensorrt_llm_galai.layers[idx].attention.qkv.weight
                 if multi_query_mode:
                     assert isinstance(v, list) and len(v) == 3
@@ -156,6 +161,7 @@ def load_from_hf_galai(tensorrt_llm_galai,
                 else:
                     dst.value = np.ascontiguousarray(split_v)
             elif 'self_attn.out_proj.weight' in k:
+                tensorrt_llm_galai.layers[idx].attention.dense.bias.value = np.zeros(v.shape[0],dtype=v.dtype)
                 dst = tensorrt_llm_galai.layers[idx].attention.dense.weight
                 split_v = split(v, tensor_parallel, rank, dim=1)
                 if use_weight_only:
@@ -171,6 +177,7 @@ def load_from_hf_galai(tensorrt_llm_galai,
                 else:
                     dst.value = np.ascontiguousarray(split_v)
             elif 'fc1.weight' in k:
+                tensorrt_llm_galai.layers[idx].mlp.fc.bias.value = np.zeros(v.shape[0],dtype=v.dtype)
                 dst = tensorrt_llm_galai.layers[idx].mlp.fc.weight
                 split_v = split(v, tensor_parallel, rank, dim=0)
                 if use_weight_only:
@@ -186,6 +193,7 @@ def load_from_hf_galai(tensorrt_llm_galai,
                 else:
                     dst.value = np.ascontiguousarray(split_v)
             elif 'fc2.weight' in k:
+                tensorrt_llm_galai.layers[idx].mlp.proj.bias.value = np.zeros(v.shape[0],dtype=v.dtype)
                 dst = tensorrt_llm_galai.layers[idx].mlp.proj.weight
                 split_v = split(v, tensor_parallel, rank, dim=1)
                 if use_weight_only:
