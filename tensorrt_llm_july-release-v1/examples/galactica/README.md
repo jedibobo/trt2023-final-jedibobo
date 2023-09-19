@@ -39,14 +39,14 @@ Then, change the tokenizer_config.json file with the following:
   "pad_token": null
 }
 ```
-which add bos_token, eos_token and pad_token when using summarize.py.
+which add bos_token, eos_token and pad_token when using summarize.py. (In fact, bos_token is not necessary.)
 
 ### Install Necessary Python Package
 ```shell
 pip install -r requirements.txt
 ```
 
-### update tensorrt_llm package modified by me
+### update tensorrt_llm package modified by the author(me)
 Otherwise will prompt this error:
 ```shell
   File "/root/workspace/trt2023-final-jedibobo/tensorrt_llm_july-release-v1/examples/galactica/weight.py", line 9, in <module>
@@ -74,6 +74,10 @@ Successfully installed tensorrt-llm-0.1.3
 ### simply run build_run.sh
 ```shell
 sh build_and_run_125m.sh
+
+or
+
+sh build_and_run_1.3b.sh # need download model first
 ```
 
 ### build 125m model
@@ -108,7 +112,7 @@ some keywords to mind are:
 - pre_norm is True for all Galactica models.
 - hidden_act gelu for all Galactica models.
 
-Finally,test model
+Finally, test model
 ```shell
 python3 summarize.py --engine_dir trt_engine/galactica-125m/fp16/1-gpu \
                      --test_hf \
@@ -132,6 +136,7 @@ Summary : [[' "I\'m a very good actor, and I\'m a very good actor."\n\n## Person
 ```
 
 The output of Galactica-1.3b is: 
+
 TRT_LLM output
 ```
 Summary : [[' "The Dukes of Hazzard" was a hit show for 26 years, and it\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit for 26 years. It\'s been a hit']]
@@ -142,6 +147,7 @@ Summary : [[' "The Dukes of Hazzard" was a hit show for 26 years, and James Best
 ```
 
 The output of Galactica-6.7b(**unable to run on A10**) is: 
+
 TRT_LLM output
 ```
 Summary : [[' James Best, best known for his portrayal of bumbling sheriff Rosco P. Coltrane on TV\'s "The Dukes of Hazzard," died Monday after a brief illness. He was 88. Best died in hospice in Hickory, North Carolina, of complications from pneumonia, said Steve Latshaw, a longtime friend and Hollywood colleague. Although he\'d been a busy actor for decades in theater and in Hollywood,']]
@@ -184,4 +190,4 @@ Hugging Face (total latency: 18.968894243240356 sec)
 
 
 ### Problem
-Currently, I am not capable of and lack time of debugging like those scripts in [**tests**](../../tests/model/test_gpt_e2e.py) dir 
+Currently, I am not capable of and lack time of debugging the way as those scripts in [**tests**](../../tests/model/test_gpt_e2e.py) dir 
