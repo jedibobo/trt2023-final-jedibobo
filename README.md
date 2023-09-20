@@ -119,45 +119,56 @@ sh build_and_run_125m_enable_fmha_weightonly.sh
 
 ## 开发与优化过程
 ### 一切的开始
-由于本人对NLP一窍不通，在选模型时也十分迷茫，在老师们的知道下在OpenLLM的leaderboard上，通过关键词pretrained筛选，并打开几个链接后，最后选择相信Meta的开源实力，选择了Galactica模型。
+&emsp;由于本人对NLP一窍不通，在选模型时也十分迷茫，在老师们的知道下在OpenLLM的leaderboard上，通过关键词pretrained筛选，并打开几个链接后，最后选择相信Meta的开源实力，选择了Galactica模型。
 
-但由于对NLP的一无所知，我无法立刻通过论文或者Huggingface模型快速知道模型的结构是否新颖，也造成本工作创新性不足。
+&emsp;但由于对NLP的一无所知，我无法立刻通过论文或者Huggingface模型快速知道模型的结构是否新颖，也造成本工作创新性不足。
 ### 终于学会了用transformers加载模型
-后续根据Model Card中Huggingface加载模型的时候，打印出model的结构，发现和OPT的结构非常相似，因此我选择了利用OPT模型结构进行迁移。这里的代码在[code](tensorrt_llm_july-release-v1/examples/galactica/hf_load_inference.py)
+&emsp;后续根据Model Card中Huggingface加载模型的时候，打印出model的结构，发现和OPT的结构非常相似，因此我选择了利用OPT模型结构进行迁移。这里的代码在[code](tensorrt_llm_july-release-v1/examples/galactica/hf_load_inference.py)。
 
 ### 修改模型阶段(FT流程)
+&emsp;通过上一步的打印，以examples中的OPT模型逐步迁移。主要有以下几个py文件：
+- weight.py 模型参数加载，一般有从FT加载和从HF原模型加载两个方式
+- build.py 用于创建build的配置加载模型参数，输出engine
+- tensorrt_llm/models/galactica/model.py 模型结构，参考了OPT的实现
 
+FT流程其实不太友好和直接，代码在[code](tensorrt_llm_july-release-v1/examples/galactica/hf_galactica_convert.py)。这个方式最后被证明是有问题的，我分析了保存的权重发现很多weight也是全0，造成模型输出问题，但其保存的config.ini文件中的参数是正确和必要的。
 ### Debug阶段-发现FT作为中转的代码中有全为0的权重，转向直接加载HF模型
+&emsp;我写了个读取bin文件，然后判断里面的矩阵是否全0，以及是否有0的行或者列。发现有很多全0的矩阵，因此我认为是我写的转FT的问题，因此根据老师的建议我转向直接加载HF模型，代码在weight.py中体现。
 
 ### Debug阶段-对应模型特点的命令行参数修改
+主要是两个参数：
+- pre_norm
+- do_layer_norm_first
+
+&emsp;第一个是和OPT最显著的差别，也从FT输出的config.ini文件中得以体现，一次需要在build阶段在命令行指定参数。
+
+&emsp;认识到这个参数需要修改的过程是通过对原论文的阅读，理解模型的基本结构。
 
 ### Debug阶段-发现bias被随机初始化
-在我写了一个完整的shell脚本，来作为mento方便复现工作的脚本，多次运行后的现象是随着每一次的编译模型，输出会随之改变。这里我认为是由于bias的随机初始化导致的，因此我在build.py中对bias进行了初始化，结果最终恢复正常。
+&emsp;在我写了一个完整的shell脚本，来作为mento方便复现工作的脚本，多次运行后的现象是随着每一次的编译模型，输出会随之改变。这里我认为是由于bias的随机初始化导致的，因此我在build.py中对bias进行了初始化，结果最终恢复正常。
 
+### 加入Feature阶段——FMHA和weight_only
+- FMHA的加入基本只需要在命令行指定参数就行
+- weight_only的加入需要修改build.py和weight.py，主要是修改weight.py中的参数加载在weight_only的分支部分，以及build.py中的部分arg参数，参考llama的weightonly打开部分TRT_LLM的network配置。
 
-这一部分是报告的主体。请把自己假定为老师，为 TensorRT 或 TensorRT-LLM 的初学者讲述如何从原始模型出发，经过一系列开发步骤，得到优化后的 TensorRT 或 TensorRT-LLM 模型。或者你是如何一步步通过修改哪些模块添加了新feature的。
+### 跑实验，写报告阶段
 
-建议：
-
-- 分步骤讲清楚开发过程
-- 最好能介绍为什么需要某个特别步骤，通过这个特别步骤解决了什么问题
-  - 比如，通过Nsight Systems绘制timeline做了性能分析，发现attention时间占比高且有优化空间（贴图展示分析过程），所以决定要写plugin。然后介绍plugin的设计与实现，并在timeline上显示attention这一部分的性能改进。
 
 ## 优化效果
 &emsp;在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型在summarize任务中，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。在开启FMHA和weight_only下，分别加速**3.862**和**2.095**倍。其中1.3B模型在FMHA和weight_only下，rough score与HFmodel的差距大于1，属于有一定精度损失的情况。
 具体结果可见：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 
-汇总表格如下：
+速度和精度(Rouge1 Score Diff)汇总表格如下：
 
 &emsp;在fp32、tf32和fp16精度下，galactica-125m模型在A10 GPU上的推理速度比较表格如下(batch size=1)
-|  精度或功能   | torch_time/trt_time  | 加速比 | Rouge1 Score Diff |
+|  网络精度或特性   | torch_time/trt_time  | 加速比 | Rouge1 Score Diff |
 | :----:| :----:|:----:|:----:|
 | fp16(torch.fp16)  | 10.479/3.632  | 2.885 | 0.752 |
 | fp16+FMHA(torch.fp16)  | 10.588/3.344  | 3.166 | 0.752 |
 | fp16+FMHA+Weight_Only(torch.fp16)  | 10.666/2.761  | 3.862 | 0.216 |
 
 &emsp;在fp32、tf32和fp16精度下，galactica-1.3b模型在A10 GPU上的推理速度比较表格如下(batch size=1)
-|  精度或功能   | torch_time/trt_time  | 加速比 | Rouge1 Score Diff |
+|  网络精度或特性   | torch_time/trt_time  | 加速比 | Rouge1 Score Diff |
 | :----:| :----:|:----:|:----:|
 | fp16(torch.fp16)  | 18.968/14.435  | 1.314 | 1.024 |
 | fp16+FMHA(torch.fp16)  | 19.129/13.790  | 1.387 | 0.676 |
@@ -165,7 +176,7 @@ sh build_and_run_125m_enable_fmha_weightonly.sh
 
 &emsp;在max_batch_size=8下，galactica-125m模型在A10 GPU上借助TRT_LLM的推理速度比较表格如下：
 
-|  精度   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs) |
+|  网络精度或特性   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs) |
 | :----:| :----:|:----:|
 | fp16(torch.fp16)  | 3.515/6.496  | 4.329 | 
 | fp16+FMHA(torch.fp16)  | 3.342/5.227  | 5.116 | 
@@ -174,7 +185,7 @@ sh build_and_run_125m_enable_fmha_weightonly.sh
 
 &emsp;在max_batch_size=8下，galactica-1.3b模型在A10 GPU上借助TRT_LLM的推理速度比较表格如下：
 
-|  精度   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs)
+|  网络精度或特性   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs)
 | :----:| :----:|:----:|
 | fp16(torch.fp16)  | 14.452/34.895  | 3.313 | 
 | fp16+FMHA(torch.fp16)  | 13.768/28.925  | 3.808 |
@@ -182,19 +193,7 @@ sh build_and_run_125m_enable_fmha_weightonly.sh
 
 &emsp;从nvidia-smi看，bs增大能显著增加GPU的利用率。具体的优化和输出结果的复现过程，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 
-- 精度：报告与原始模型进行精度对比测试的结果，验证精度达标。
-  - 如果选用TensorRT-LLM，请跑summarize任务并使用 [Rouge](https://huggingface.co/spaces/evaluate-metric/rouge) 来对比模型优化前后的精度差距。如果精度良好，原始模型与优化模型的Rouge score的差异一般在1以内。例子见 TensorRT-LLM docker 中 /root/workspace/tensorrt_llm_july-release-v1/examples/gpt/summarize.py
-  - 如果选用TensorRT，这里的精度测试指的是针对“原始模型”和“TensorRT优化模型”分别输出的数据（tensor）进行数值比较。请给出绝对误差和相对误差的统计结果（至少包括最大值、平均值与中位数）。
-    - 使用训练好的权重和有意义的输入数据更有说服力。如果选手使用了随机权重和输入数据，请在这里注明。
-    - 在精度损失较大的情况下，鼓励选手用训练好的权重和测试数据集对模型优化前与优化后的准确度指标做全面比较，以增强说服力。
-- 性能：例如可以用图表展示不同batch size或sequence length下性能加速效果（考虑到可能模型可能比较大，可以只给batch size为1的数据）
-  - 一般用原始模型作为baseline
-  - 一般提供模型推理时间的加速比即可；若能提供压力测试下的吞吐提升则更好。
 
-请注意：
-
-- 相关测试代码也需要包含在代码仓库中，可被复现。
-- 请写明云主机的软件硬件环境，方便他人参考。
 
 ## Bug报告（可选）
 无
@@ -227,7 +226,7 @@ python3 summarize.py --engine_dir=trt_engine/gpt2/fp16/1-gpu --test_hf
 
 
 ## 经验与体会
-&emsp;比赛内容方面：这算本人第三年参加Hackathon了，每一年的难度都肉眼可见增加。但目前还和我本人代码能力的提升在一个相对平衡的状态，感觉自己也在不断进步，虽然速度不够快，但我认为是在平时工作学习没用上TRT，因此对业务流程不是那么熟悉。举个例子，上年第一的ching大佬，这次比我初赛高了不超500分（虽然人家最后3天搞定的），上年基本是我分数的5倍还要多。今年也在群里看着大佬们的讨论，尤其是Tlntin大佬的开源精神，让我深感佩服。
+&emsp;比赛内容方面：这算本人第三年参加Hackathon了，每一年的难度都肉眼可见增加。但目前还和我本人代码能力的提升在一个相对平衡的状态，感觉自己也在不断进步，虽然速度不够快，但我认为是在平时工作学习没用上TRT，因此对业务流程不是那么熟悉。举个例子，上年第一的ching大佬，这次比我初赛高了不超500分（虽然人家最后3天搞定的），上年基本是我分数的5倍还要多。今年也在群里看着大佬们的讨论，尤其是Tlntin大佬的开源精神，让我深感佩服。还要感谢群里帮我解决问题的各位nv专家，帮我及时指出问题和答疑解惑，以及鼓励和帮助我提高。
 
 - 初赛：刚看初赛赛题还是挺懵的，首先没搞过SD，对其中step以及何处能加速都没有理解，其次没弄过这么大的模型，个人也仅仅是对CLIP还有点印象。我的经历分几个阶段吧，首先花了很多时间看懂了赛方提供的Controlnet部分的加速流程以及通过TRT的python API，对每个阶段张量的形状有更细致的了解；然后，逐个对CLIP、VAE、Control、UNET几个部分进行单独适配并替换到推理流程中；之后开始看群里的一些经验分享，比如用NV官方SD例子中的cuda graph的Engine封装、合并CLIP推理、降低Steps来踩PD12的及格线、合并Control和Unet等操作，最后两天就是不断提交刷分，以及看群里大佬分享的一些模型优化的细节，比如不打印tqdm等等赚小分的操作。真的细节决定成败。但还是有遗憾，因为对profiler使用不熟练，因此我的优化全都是看代码，而不是根据timeline有针对性地去优化。
 - 复赛：复赛内容确实有点难度，对于NLP的不熟悉以及本身不擅长通过API搭建模型的开发方式，让我在选题上花费了很多时间，最后的成果也停留在简单模型的适配上，没能在feature上更进一步。时间安排上，同时实验室方面任务比较繁杂，很难专心攻克比赛，初赛是从赛题开放2周后，复赛是选题一周，然后直到9月初第二周才开始全力弄比赛。本来都觉得要拉了，但决心再冲刺一波，毕竟选的不是很难，误打误撞发现了BIAS随机初始化的问题，感觉像是大一学C的时候不初始化变量的锅，写python多了，都忘记了这茬。
@@ -239,6 +238,6 @@ python3 summarize.py --engine_dir=trt_engine/gpt2/fp16/1-gpu --test_hf
 - 丰富下doc吧，Debug部分没有学会，我太菜了。
 
 &emsp;遗憾和给自己的目标：
-- 性能分析和Bug发现部分，感觉对我来说还有很大距离。首先Nsys用的不行，其次Debug手段还是太单一。
+- 性能分析和Bug发现部分，感觉对我来说还有很大距离。首先Nsys用的不行，其次Debug手段还是太单一。因此，没有在Plugin上下很大功夫，不过也少了重新编译trt_llm部分库得麻烦。
 
 欢迎在这里总结经验，抒发感慨。
