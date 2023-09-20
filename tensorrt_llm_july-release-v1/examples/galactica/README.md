@@ -176,6 +176,21 @@ for 6.7B model(rouge1 rouge1 : 19.116646730129816), it almost touches limit of r
 [09/19/2023-12:52:14] [TRT-LLM] [I]   rougeL : 8.42338520559755
 [09/19/2023-12:52:14] [TRT-LLM] [I]   rougeLsum : 10.437959123452638
 ```
+1.3B
+```
+[09/20/2023-09:23:41] [TRT-LLM] [I] TensorRT-LLM (total latency: 14.450116634368896 sec)
+[09/20/2023-09:23:41] [TRT-LLM] [I] TensorRT-LLM beam 0 result
+[09/20/2023-09:23:41] [TRT-LLM] [I]   rouge1 : 15.82523484186119
+[09/20/2023-09:23:41] [TRT-LLM] [I]   rouge2 : 3.0146271394965547
+[09/20/2023-09:23:41] [TRT-LLM] [I]   rougeL : 12.201330312061408
+[09/20/2023-09:23:41] [TRT-LLM] [I]   rougeLsum : 13.835589369518091
+[09/20/2023-09:23:41] [TRT-LLM] [I] Hugging Face (total latency: 19.247478008270264 sec)
+[09/20/2023-09:23:41] [TRT-LLM] [I] HF beam 0 result
+[09/20/2023-09:23:41] [TRT-LLM] [I]   rouge1 : 16.849348629816337
+[09/20/2023-09:23:41] [TRT-LLM] [I]   rouge2 : 3.403001301754608
+[09/20/2023-09:23:41] [TRT-LLM] [I]   rougeL : 12.892710146409058
+[09/20/2023-09:23:41] [TRT-LLM] [I]   rougeLsum : 14.695898263141338
+```
 
 #### enable fmha for Galactica-125M and Galactica-1.3B
 125M

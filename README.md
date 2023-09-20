@@ -1,7 +1,7 @@
 # 关于复赛与TensorRT-LLM
-大语言模型是计算机行业未来的重要方向，英伟达希望借助复赛的机会，加强开发团队与开发者的交流，让开发者快速上手英伟达即将正式推出的大语言模型推理加速库TensorRT-LLM，并能在未来的工作中熟练运用。
+&emsp;大语言模型是计算机行业未来的重要方向，英伟达希望借助复赛的机会，加强开发团队与开发者的交流，让开发者快速上手英伟达即将正式推出的大语言模型推理加速库TensorRT-LLM，并能在未来的工作中熟练运用。
 
-TensorRT-LLM是对TensorRT的再封装。它改善了TensorRT模型的手工搭建方式，引入了plugin提高推理性能，并加入了大量新功能。  
+&emsp;TensorRT-LLM是对TensorRT的再封装。它改善了TensorRT模型的手工搭建方式，引入了plugin提高推理性能，并加入了大量新功能。  
   + 虽然取的名字提到LLM（Large Language Model，大语言模型），TensorRT-LLM可以用来搭建任意AI模型。
   + TensorRT-LLM现在没有ONNX parser，所以不能走ONNX workflow，必须手工搭建模型。
   + 大家拿到的TensorRT-LLM只是一个非公开的预览版本。在使用过程中可能会遇到一些问题，比如没有支持完善的feature。英伟达正在开发完善它。
@@ -44,17 +44,18 @@ TensorRT-LLM是对TensorRT的再封装。它改善了TensorRT模型的手工搭�
 
 
 ## 总述
-本项目主要贡献在于：使用Nvidia即将发布的TensorRT_LLM工具，对Galactica系列模型([paper](https://arxiv.org/abs/2211.09085)) ([website](https://galactica.org/)) ([official-demo](https://galactica.org/explore/)) ([huggingface-model](https://huggingface.co/facebook/galactica-6.7b))进行推理优化，具体选题内容为：用TensorRT-LLM实现新模型。
+&emsp;本项目主要贡献在于：使用Nvidia即将发布的TensorRT_LLM工具，对Galactica系列模型([paper](https://arxiv.org/abs/2211.09085)) ([website](https://galactica.org/)) ([official-demo](https://galactica.org/explore/)) ([huggingface-model](https://huggingface.co/facebook/galactica-6.7b))进行推理优化，具体选题内容为：用TensorRT-LLM实现新模型。
 
 ### Galactica模型简单介绍
 ```
-Galactica models are trained on a large corpus comprising more than 360 millions in-context citations and over 50 millions of unique references normalized across a diverse set of sources. This enables Galactica to suggest citations and help discover related papers.
+    Galactica models are trained on a large corpus comprising more than 360 millions in-context citations and over 50 millions of unique references normalized across a diverse set of sources. This enables Galactica to suggest citations and help discover related papers.
 ```
-Galactica大型语言模型（LLM）正在用数百万条学术内容进行训练。它的目的是帮助研究界更好地管理"信息爆炸"。Galactica是由Meta AI与Papers with Code合作开发的。该团队认为信息过载是科学进步的一个主要障碍。"研究人员被埋没在大量的论文中，越来越无法区分有意义的和无意义的"。简单来讲，就是聚合有意义的内容，简直是我等科研狗的福音。
+&emsp;Galactica大型语言模型（LLM）正在用数百万条学术内容进行训练。它的目的是帮助研究界更好地管理"信息爆炸"。Galactica是由Meta AI与Papers with Code合作开发的。该团队认为信息过载是科学进步的一个主要障碍。"研究人员被埋没在大量的论文中，越来越无法区分有意义的和无意义的"。简单来讲，就是**聚合有意义的内容**，简直是我等科研狗的福音。
 
 ### Galactica模型的特点
 ```
 Architecture
+
 Galactica uses a Transformer architecture in a decoder-only setup (Vaswani et al., 2017), with the following
 modifications:
 • GeLU Activation - we use GeLU activations for all model sizes (Hendrycks and Gimpel, 2016).
@@ -76,46 +77,9 @@ vocabulary was generated from a randomly selected 2% subset of the training data
 - 使用了BPE词表
 
 ### 优化效果
-在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。在开启FMHA和weight_only下，分别加速**3.862**和**2.095**倍。
 
-汇总表格如下：
-
-在fp32、tf32和fp16精度下，galactica-125m模型在A10 GPU上的推理速度比较表格如下(batch size=1)
-|  精度或功能   | torch_time/trt_time  | 加速比
-| :----:| :----:|:----:|
-| fp16(torch.fp16)  | 10.479/3.632  | 2.885 | 
-| fp16+FMHA(torch.fp16)  | 10.588/3.344  | 3.166 |
-| fp16+FMHA+Weight_Only(torch.fp16)  | 10.666/2.761  | 3.862 |
-
-在fp32、tf32和fp16精度下，galactica-1.3b模型在A10 GPU上的推理速度比较表格如下(batch size=1)
-|  精度或功能   | torch_time/trt_time  | 加速比
-| :----:| :----:|:----:|
-| fp16(torch.fp16)  | 18.968/14.435  | 1.314 | 
-| fp16+FMHA(torch.fp16)  | 19.129/13.790  | 1.387 |
-| fp16+FMHA+Weight_Only(torch.fp16)  | 19.304/9.215  | 2.095 |
-
-在max_batch_size=8下，galactica-125m模型在A10 GPU上借助TRT_LLM的推理速度比较表格如下：
-
-|  精度   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs)
-| :----:| :----:|:----:|
-| fp16(torch.fp16)  | 3.515/6.496  | 4.329 | 
-| fp16+FMHA(torch.fp16)  | 3.342/5.227  | 5.116 |
-| fp16+FMHA+Weight_Only(torch.fp16)  | 2.752/5.790  | 3.802 |
-
-
-在max_batch_size=8下，galactica-1.3b模型在A10 GPU上借助TRT_LLM的推理速度比较表格如下：
-
-|  精度   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs)
-| :----:| :----:|:----:|
-| fp16(torch.fp16)  | 14.452/34.895  | 3.313 | 
-| fp16+FMHA(torch.fp16)  | 13.768/28.925  | 3.808 |
-| fp16+FMHA+Weight_Only(torch.fp16)  | 9.889/32.826  | 2.410 |
-
-从nvidia-smi看，bs增大能显著增加GPU的利用率。
-
-具体的优化和输出结果的复现过程，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 ### 在docker里编译运行的完整步骤
-有些部分需要科学上网，因此我这边需要**两个**命令行
+&emsp;有些部分需要科学上网，因此我这边需要**两个**命令行
 #### 命令行1
 ```shell
 cd /root/clash-linx/
@@ -146,15 +110,12 @@ sh build_and_run_125m_enable_fmha_weightonly.sh
 
 ### 开发工作的难点
 开发中主要攻克的问题：
-- 适配了Galactica模型的weight_only模式，以及对应的build.py和weight.py
+- 适配了Galactica模型的weight_only模式，通过修改对应的build.py和weight.py
 - 搞清楚OPT和Galactica的区别，主要在于激活函数、模型参数、无BIAS结构、加载模型参数的方式。
 - 参考LLAMA直接从hf读取模型的方式，编写了独立的[加载参数代码](tensorrt_llm_july-release-v1/examples/galactica/weight.py)，对BIAS全为0的模型特性加以适配。以及利用加载参数函数，编写对应的build.py中的参数加载部分。
 - 参考OPT通过FT格式加载模型参数的流程，借助了其中的config.ini配置文件，成功对模型进行了正确的初始化。
-- 在tensorrt_llm 目录下成功添加对应的模型文件，并可通过pip打包重新安装后利用tensorrt_llm包加载模型结构
+- 在tensorrt_llm 目录下成功添加对应的模型文件，并可通过pip打包重新安装后利用tensorrt_llm包加载模型结构。
 
-请在这一节里总结你的工作难点与亮点。
-
-- 如果使用 TensorRT-LLM 进行优化，描述以下方面可供选手参考：如果搭建了新模型， 请介绍模型结构有无特别之处，在模型的搭建过程中使用了什么算子，有没有通过plugin支持的新算子。如果支持新feature，请介绍这个feature具体需要修改哪些模块才能实现。如果优化已有模型，请介绍模型性能瓶颈以及解决方法。另外还可以包含工程实现以及debug过程中的难点。
 
 ## 开发与优化过程
 ### 一切的开始
@@ -183,8 +144,43 @@ sh build_and_run_125m_enable_fmha_weightonly.sh
   - 比如，通过Nsight Systems绘制timeline做了性能分析，发现attention时间占比高且有优化空间（贴图展示分析过程），所以决定要写plugin。然后介绍plugin的设计与实现，并在timeline上显示attention这一部分的性能改进。
 
 ## 优化效果
+&emsp;在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型在summarize任务中，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。在开启FMHA和weight_only下，分别加速**3.862**和**2.095**倍。其中1.3B模型在FMHA和weight_only下，rough score与HFmodel的差距大于1，属于有一定精度损失的情况。
+具体结果可见：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 
-这一部分介绍你的工作在云主机上的运行效果。如果是优化模型，需要分两部分说明：
+汇总表格如下：
+
+&emsp;在fp32、tf32和fp16精度下，galactica-125m模型在A10 GPU上的推理速度比较表格如下(batch size=1)
+|  精度或功能   | torch_time/trt_time  | 加速比 | Rouge1 Score Diff |
+| :----:| :----:|:----:|:----:|
+| fp16(torch.fp16)  | 10.479/3.632  | 2.885 | 0.752 |
+| fp16+FMHA(torch.fp16)  | 10.588/3.344  | 3.166 | 0.752 |
+| fp16+FMHA+Weight_Only(torch.fp16)  | 10.666/2.761  | 3.862 | 0.216 |
+
+&emsp;在fp32、tf32和fp16精度下，galactica-1.3b模型在A10 GPU上的推理速度比较表格如下(batch size=1)
+|  精度或功能   | torch_time/trt_time  | 加速比 | Rouge1 Score Diff |
+| :----:| :----:|:----:|:----:|
+| fp16(torch.fp16)  | 18.968/14.435  | 1.314 | 1.024 |
+| fp16+FMHA(torch.fp16)  | 19.129/13.790  | 1.387 | 0.676 |
+| fp16+FMHA+Weight_Only(torch.fp16)  | 19.304/9.215  | 2.095 | **1.987** |
+
+&emsp;在max_batch_size=8下，galactica-125m模型在A10 GPU上借助TRT_LLM的推理速度比较表格如下：
+
+|  精度   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs) |
+| :----:| :----:|:----:|
+| fp16(torch.fp16)  | 3.515/6.496  | 4.329 | 
+| fp16+FMHA(torch.fp16)  | 3.342/5.227  | 5.116 | 
+| fp16+FMHA+Weight_Only(torch.fp16)  | 2.752/5.790  | 3.802 | 
+
+
+&emsp;在max_batch_size=8下，galactica-1.3b模型在A10 GPU上借助TRT_LLM的推理速度比较表格如下：
+
+|  精度   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs)
+| :----:| :----:|:----:|
+| fp16(torch.fp16)  | 14.452/34.895  | 3.313 | 
+| fp16+FMHA(torch.fp16)  | 13.768/28.925  | 3.808 |
+| fp16+FMHA+Weight_Only(torch.fp16)  | 9.889/32.826  | 2.410 |
+
+&emsp;从nvidia-smi看，bs增大能显著增加GPU的利用率。具体的优化和输出结果的复现过程，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 
 - 精度：报告与原始模型进行精度对比测试的结果，验证精度达标。
   - 如果选用TensorRT-LLM，请跑summarize任务并使用 [Rouge](https://huggingface.co/spaces/evaluate-metric/rouge) 来对比模型优化前后的精度差距。如果精度良好，原始模型与优化模型的Rouge score的差异一般在1以内。例子见 TensorRT-LLM docker 中 /root/workspace/tensorrt_llm_july-release-v1/examples/gpt/summarize.py
@@ -201,32 +197,48 @@ sh build_and_run_125m_enable_fmha_weightonly.sh
 - 请写明云主机的软件硬件环境，方便他人参考。
 
 ## Bug报告（可选）
-
-提交bug是对TensorRT/TensorRT-LLM的另一种贡献。发现的TensorRT/TensorRT-LLM或cookbook、或文档和教程相关bug，请提交到[github issues](https://github.com/NVIDIA/trt-samples-for-hackathon-cn/issues)，并请在这里给出链接。  
-
-对于每个bug，请标记上hackathon2023标签，并写好正文：
-
-- 对于cookbook或文档和教程相关bug，说清楚问题即可，不必很详细。
-- 对于TensorRT bug，首先确认在云主机上使用NGC docker + TensorRT 9.0.0.1可复现。
-- 然后填写如下模板，并请导师复核确认（前面“评分标准”已经提到，确认有效可得附加分）：
-  - Environment
-    - TensorRT 9.0.0.1
-    - Versions of CUDA, CUBLAS, CuDNN used
-    - Container used
-    - NVIDIA driver version
-  - Reproduction Steps
-    - Provide detailed reproduction steps for the issue here, including any commands run on the command line.
-  - Expected Behavior
-    - Provide a brief summary of the expected behavior of the software. Provide output files or examples if possible.
-  - Actual Behavior
-    - Describe the actual behavior of the software and how it deviates from the expected behavior. Provide output files or examples if possible.
-  - Additional Notes
-    - Provide any additional context here you think might be useful for the TensorRT team to help debug this issue (such as experiments done, potential things to investigate).
+无
 
 ## 送分题答案（可选）
+```shell
+python3 run.py --max_output_len=8
+Input: Born in north-east france, Soyer trained as a
+Output:  chef before moving to London in the early
+```
 
-如果你做了送分题，请把答案写在这里。
+```shell
+python3 summarize.py --engine_dir=trt_engine/gpt2/fp16/1-gpu --test_hf
+ --batch_size=1 --test_trt_llm --hf_model_location=gpt2 --check_accuracy --tensorrt_llm_rouge1_threshold=14
 
-## 经验与体会（可选）
+[08/17/2023-07:32:10] [TRT-LLM] [I] TensorRT-LLM (total latency: 2.6123523712158203 sec)
+[08/17/2023-07:32:10] [TRT-LLM] [I] TensorRT-LLM beam 0 result
+[08/17/2023-07:32:10] [TRT-LLM] [I]   rouge1 : 21.777038933426514
+[08/17/2023-07:32:10] [TRT-LLM] [I]   rouge2 : 6.1022639415477835
+[08/17/2023-07:32:10] [TRT-LLM] [I]   rougeL : 16.941929893320054
+[08/17/2023-07:32:10] [TRT-LLM] [I]   rougeLsum : 18.853465705869933
+[08/17/2023-07:32:10] [TRT-LLM] [I] Hugging Face (total latency: 15.79952073097229 sec)
+[08/17/2023-07:32:10] [TRT-LLM] [I] HF beam 0 result
+[08/17/2023-07:32:10] [TRT-LLM] [I]   rouge1 : 18.182978950152904
+[08/17/2023-07:32:10] [TRT-LLM] [I]   rouge2 : 5.166241888544473
+[08/17/2023-07:32:10] [TRT-LLM] [I]   rougeL : 14.851620358520162
+[08/17/2023-07:32:10] [TRT-LLM] [I]   rougeLsum : 16.95757748412272
+```
+
+
+
+## 经验与体会
+&emsp;比赛内容方面：这算本人第三年参加Hackathon了，每一年的难度都肉眼可见增加。但目前还和我本人代码能力的提升在一个相对平衡的状态，感觉自己也在不断进步，虽然速度不够快，但我认为是在平时工作学习没用上TRT，因此对业务流程不是那么熟悉。举个例子，上年第一的ching大佬，这次比我初赛高了不超500分（虽然人家最后3天搞定的），上年基本是我分数的5倍还要多。今年也在群里看着大佬们的讨论，尤其是Tlntin大佬的开源精神，让我深感佩服。
+
+- 初赛：刚看初赛赛题还是挺懵的，首先没搞过SD，对其中step以及何处能加速都没有理解，其次没弄过这么大的模型，个人也仅仅是对CLIP还有点印象。我的经历分几个阶段吧，首先花了很多时间看懂了赛方提供的Controlnet部分的加速流程以及通过TRT的python API，对每个阶段张量的形状有更细致的了解；然后，逐个对CLIP、VAE、Control、UNET几个部分进行单独适配并替换到推理流程中；之后开始看群里的一些经验分享，比如用NV官方SD例子中的cuda graph的Engine封装、合并CLIP推理、降低Steps来踩PD12的及格线、合并Control和Unet等操作，最后两天就是不断提交刷分，以及看群里大佬分享的一些模型优化的细节，比如不打印tqdm等等赚小分的操作。真的细节决定成败。但还是有遗憾，因为对profiler使用不熟练，因此我的优化全都是看代码，而不是根据timeline有针对性地去优化。
+- 复赛：复赛内容确实有点难度，对于NLP的不熟悉以及本身不擅长通过API搭建模型的开发方式，让我在选题上花费了很多时间，最后的成果也停留在简单模型的适配上，没能在feature上更进一步。时间安排上，同时实验室方面任务比较繁杂，很难专心攻克比赛，初赛是从赛题开放2周后，复赛是选题一周，然后直到9月初第二周才开始全力弄比赛。本来都觉得要拉了，但决心再冲刺一波，毕竟选的不是很难，误打误撞发现了BIAS随机初始化的问题，感觉像是大一学C的时候不初始化变量的锅，写python多了，都忘记了这茬。
+
+&emsp;服务器方面：网确实有点拉，全程基本在本地服务器开发的，感觉阿里云背大锅。
+
+&emsp;给NV的TRT_LLM的一些建议：
+- load参数的检查，我看Intro pdf的时候觉得可能在参数自动加载的时候就没这个问题了。
+- 丰富下doc吧，Debug部分没有学会，我太菜了。
+
+&emsp;遗憾和给自己的目标：
+- 性能分析和Bug发现部分，感觉对我来说还有很大距离。首先Nsys用的不行，其次Debug手段还是太单一。
 
 欢迎在这里总结经验，抒发感慨。
