@@ -77,7 +77,9 @@ vocabulary was generated from a randomly selected 2% subset of the training data
 
 ### 优化效果
 在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。在开启FMHA和weight_only下，分别加速**3.862**和**2.095**倍。
+
 汇总表格如下：
+
 在fp32、tf32和fp16精度下，galactica-125m模型在A10 GPU上的推理速度比较表格如下(batch size=1)
 |  精度或功能   | torch_time/trt_time  | 加速比
 | :----:| :----:|:----:|
@@ -92,9 +94,28 @@ vocabulary was generated from a randomly selected 2% subset of the training data
 | fp16+FMHA(torch.fp16)  | 19.129/13.790  | 1.387 |
 | fp16+FMHA+Weight_Only(torch.fp16)  | 19.304/9.215  | 2.095 |
 
+在max_batch_size=8下，galactica-125m模型在A10 GPU上借助TRT_LLM的推理速度比较表格如下：
+
+|  精度   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs)
+| :----:| :----:|:----:|
+| fp16(torch.fp16)  | 3.515/6.496  | 4.329 | 
+| fp16+FMHA(torch.fp16)  | 3.342/5.227  | 5.116 |
+| fp16+FMHA+Weight_Only(torch.fp16)  | 2.752/5.790  | 3.802 |
+
+
+在max_batch_size=8下，galactica-1.3b模型在A10 GPU上借助TRT_LLM的推理速度比较表格如下：
+
+|  精度   | bs=1/bs=8 time | 吞吐比(bs*t_1/t_bs)
+| :----:| :----:|:----:|
+| fp16(torch.fp16)  | 14.452/34.895  | 3.313 | 
+| fp16+FMHA(torch.fp16)  | 13.768/28.925  | 3.808 |
+| fp16+FMHA+Weight_Only(torch.fp16)  | 9.889/32.826  | 2.410 |
+
+从nvidia-smi看，bs增大能显著增加GPU的利用率。
+
 具体的优化和输出结果的复现过程，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 ### 在docker里编译运行的完整步骤
-有些部分需要科学上网，因此我这边需要**两个** 命令行
+有些部分需要科学上网，因此我这边需要**两个**命令行
 #### 命令行1
 ```shell
 cd /root/clash-linx/
@@ -109,7 +130,16 @@ export ALL_PROXY=http://127.0.0.1:7890
 
 cd /root/workspace/trt2023-final-jedibobo/tensorrt_llm_july-release-v1/examples/galactica/
 
-sh build_and_run_125m.sh #or sh build_and_run_1.3b.sh
+sh build_and_run_125m.sh 
+#or sh build_and_run_1.3b.sh
+
+# enable only FMHA
+sh build_and_run_125m_enable_fmha.sh
+# or sh build_and_run_125m_enable_fmha_weightonly.sh
+
+# enable FMHA and weight_only
+sh build_and_run_125m_enable_fmha_weightonly.sh
+# or sh build_and_run_1.3b_enable_fmha_weightonly.sh
 ```
 
 ## 主要开发工作

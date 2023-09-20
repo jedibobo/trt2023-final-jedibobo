@@ -242,6 +242,7 @@ You can see there is not much performance drop compared to HF resultss.
 [09/20/2023-03:19:07] [TRT-LLM] [I]   rougeL : 12.892710146409058
 [09/20/2023-03:19:07] [TRT-LLM] [I]   rougeLsum : 14.695898263141338
 ```
+When both weight only and FMHA is enabled, the conclusion is on A10 GPU, the accuracy loss is a little significant(rough1 diff >1)
 
 ### Speed-up Ratio
 For Galactica-125M, the speed-up is 2.885 on A10 Ali cloud machine.
