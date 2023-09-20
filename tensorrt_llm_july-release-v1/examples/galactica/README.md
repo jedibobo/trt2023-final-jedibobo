@@ -176,6 +176,41 @@ for 6.7B model(rouge1 rouge1 : 19.116646730129816), it almost touches limit of r
 [09/19/2023-12:52:14] [TRT-LLM] [I]   rougeL : 8.42338520559755
 [09/19/2023-12:52:14] [TRT-LLM] [I]   rougeLsum : 10.437959123452638
 ```
+
+#### enable fmha for Galactica-125M and Galactica-1.3B
+125M
+```
+[09/20/2023-01:59:00] [TRT-LLM] [I] TensorRT-LLM (total latency: 3.344346761703491 sec)
+[09/20/2023-01:59:00] [TRT-LLM] [I] TensorRT-LLM beam 0 result
+[09/20/2023-01:59:00] [TRT-LLM] [I]   rouge1 : 10.277576407234886
+[09/20/2023-01:59:00] [TRT-LLM] [I]   rouge2 : 1.6005120808715905
+[09/20/2023-01:59:00] [TRT-LLM] [I]   rougeL : 8.08101934142795
+[09/20/2023-01:59:00] [TRT-LLM] [I]   rougeLsum : 9.833098488425106
+[09/20/2023-01:59:00] [TRT-LLM] [I] Hugging Face (total latency: 10.588122367858887 sec)
+[09/20/2023-01:59:00] [TRT-LLM] [I] HF beam 0 result
+[09/20/2023-01:59:00] [TRT-LLM] [I]   rouge1 : 11.029703712283155
+[09/20/2023-01:59:00] [TRT-LLM] [I]   rouge2 : 1.7302256076234355
+[09/20/2023-01:59:00] [TRT-LLM] [I]   rougeL : 8.42338520559755
+[09/20/2023-01:59:00] [TRT-LLM] [I]   rougeLsum : 10.437959123452638
+```
+
+1.3B
+```
+[09/20/2023-02:15:37] [TRT-LLM] [I] TensorRT-LLM (total latency: 13.790514469146729 sec)
+[09/20/2023-02:15:37] [TRT-LLM] [I] TensorRT-LLM beam 0 result
+[09/20/2023-02:15:37] [TRT-LLM] [I]   rouge1 : 16.17296647271511
+[09/20/2023-02:15:37] [TRT-LLM] [I]   rouge2 : 3.1515046849233523
+[09/20/2023-02:15:37] [TRT-LLM] [I]   rougeL : 12.345827479167633
+[09/20/2023-02:15:37] [TRT-LLM] [I]   rougeLsum : 14.257476328986169
+[09/20/2023-02:15:37] [TRT-LLM] [I] Hugging Face (total latency: 19.12988781929016 sec)
+[09/20/2023-02:15:37] [TRT-LLM] [I] HF beam 0 result
+[09/20/2023-02:15:37] [TRT-LLM] [I]   rouge1 : 16.849348629816337
+[09/20/2023-02:15:37] [TRT-LLM] [I]   rouge2 : 3.403001301754608
+[09/20/2023-02:15:37] [TRT-LLM] [I]   rougeL : 12.892710146409058
+[09/20/2023-02:15:37] [TRT-LLM] [I]   rougeLsum : 14.695898263141338
+```
+You can see there is not much performance drop compared to HF resultss.
+
 ### Speed-up Ratio
 For Galactica-125M, the speed-up is 2.885 on A10 Ali cloud machine.
 ```
@@ -189,6 +224,14 @@ TensorRT-LLM (total latency: 14.435588836669922 sec)
 Hugging Face (total latency: 18.968894243240356 sec)
 ```
 
+#### Enable fmha
+For Galactica-125M, the speed-up is 3.166 on A10 Ali cloud machine, when fmha is enabled.
+```
+TensorRT-LLM (total latency: 3.344346761703491 sec)
+Hugging Face (total latency: 10.588122367858887 sec)
+```
+For Galactica-1.3B, the speed-up is 1.387 on A10 Ali cloud machine, when fmha is enabled.
 
-### Problem
+**Conclusion:Compared to No FMHA, there is a subtle improvement without much performance drop or accuracy loss.**
+### Future Work
 Currently, I am not capable of and lack time of debugging the way as those scripts in [**tests**](../../tests/model/test_gpt_e2e.py) dir 

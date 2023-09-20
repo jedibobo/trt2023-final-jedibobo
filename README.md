@@ -76,10 +76,10 @@ vocabulary was generated from a randomly selected 2% subset of the training data
 - 使用了BPE词表
 
 ### 优化效果
-在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。
-具体的优化和输出结果，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
+在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。
+具体的优化和输出结果的复现过程，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 ### 在docker里编译运行的完整步骤
-有些部分需要科学上网，因此我这边需要两个命令行
+有些部分需要科学上网，因此我这边需要**两个** 命令行
 #### 命令行1
 ```shell
 cd /root/clash-linx/
