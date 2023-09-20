@@ -76,7 +76,22 @@ vocabulary was generated from a randomly selected 2% subset of the training data
 - 使用了BPE词表
 
 ### 优化效果
-在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。在开启FMHA和weight_only下，分别加速** **和** **
+在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。在开启FMHA和weight_only下，分别加速**3.862**和**2.095**倍。
+汇总表格如下：
+在fp32、tf32和fp16精度下，galactica-125m模型在A10 GPU上的推理速度比较表格如下(batch size=1)
+|  精度或功能   | torch_time/trt_time  | 加速比
+| :----:| :----:|:----:|
+| fp16(torch.fp16)  | 10.479/3.632  | 2.885 | 
+| fp16+FMHA(torch.fp16)  | 10.588/3.344  | 3.166 |
+| fp16+FMHA+Weight_Only(torch.fp16)  | 10.666/2.761  | 3.862 |
+
+在fp32、tf32和fp16精度下，galactica-1.3b模型在A10 GPU上的推理速度比较表格如下(batch size=1)
+|  精度或功能   | torch_time/trt_time  | 加速比
+| :----:| :----:|:----:|
+| fp16(torch.fp16)  | 18.968/14.435  | 1.314 | 
+| fp16+FMHA(torch.fp16)  | 19.129/13.790  | 1.387 |
+| fp16+FMHA+Weight_Only(torch.fp16)  | 19.304/9.215  | 2.095 |
+
 具体的优化和输出结果的复现过程，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 ### 在docker里编译运行的完整步骤
 有些部分需要科学上网，因此我这边需要**两个** 命令行

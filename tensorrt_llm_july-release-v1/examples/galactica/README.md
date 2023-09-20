@@ -263,6 +263,10 @@ TensorRT-LLM (total latency: 3.344346761703491 sec)
 Hugging Face (total latency: 10.588122367858887 sec)
 ```
 For Galactica-1.3B, the speed-up is 1.387 on A10 Ali cloud machine, when fmha is enabled.
+```
+TensorRT-LLM (total latency: 13.790514469146729 sec)
+Hugging Face (total latency: 19.12988781929016 sec)
+```
 
 **Conclusion:Compared to No FMHA, there is a subtle improvement without much performance drop or accuracy loss.**
 
