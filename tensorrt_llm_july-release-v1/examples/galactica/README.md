@@ -1,7 +1,12 @@
 # Galactica
 
 
-## Install Requirements and Prepare model
+## Setup Env(Install Requirements and Prepare model)
+### 获取docker image
+```shell
+docker pull registry.cn-hangzhou.aliyuncs.com/trt-hackathon/trt-hackathon:final_v1
+docker run  -it --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 --network host --name hackathon2023  registry.cn-hangzhou.aliyuncs.com/trt-hackathon/trt-hackathon:final_v1 bash
+```
 ### install git lfs in docker
 ```shell
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash 

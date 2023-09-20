@@ -76,8 +76,8 @@ vocabulary was generated from a randomly selected 2% subset of the training data
 - 使用了学习的位置编码（Learned Positional Embeddings）
 - 使用了BPE词表
 
-### 优化效果
-
+### 项目如何setup
+详细见[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md#setup-envinstall-requirements-and-prepare-model)
 ### 在docker里编译运行的完整步骤
 &emsp;有些部分需要科学上网，因此我这边需要**两个**命令行
 #### 命令行1
