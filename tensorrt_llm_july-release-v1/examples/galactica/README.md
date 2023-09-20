@@ -211,6 +211,38 @@ for 6.7B model(rouge1 rouge1 : 19.116646730129816), it almost touches limit of r
 ```
 You can see there is not much performance drop compared to HF resultss.
 
+#### enable fmha and weight_only
+125m
+```
+[09/20/2023-03:23:09] [TRT-LLM] [I] TensorRT-LLM (total latency: 2.7617087364196777 sec)
+[09/20/2023-03:23:09] [TRT-LLM] [I] TensorRT-LLM beam 0 result
+[09/20/2023-03:23:09] [TRT-LLM] [I]   rouge1 : 10.813010399725236
+[09/20/2023-03:23:09] [TRT-LLM] [I]   rouge2 : 1.5951352415935847
+[09/20/2023-03:23:09] [TRT-LLM] [I]   rougeL : 8.516456604041817
+[09/20/2023-03:23:09] [TRT-LLM] [I]   rougeLsum : 9.859581700840726
+[09/20/2023-03:23:09] [TRT-LLM] [I] Hugging Face (total latency: 10.66635537147522 sec)
+[09/20/2023-03:23:09] [TRT-LLM] [I] HF beam 0 result
+[09/20/2023-03:23:10] [TRT-LLM] [I]   rouge1 : 11.029703712283155
+[09/20/2023-03:23:10] [TRT-LLM] [I]   rouge2 : 1.7302256076234355
+[09/20/2023-03:23:10] [TRT-LLM] [I]   rougeL : 8.42338520559755
+[09/20/2023-03:23:10] [TRT-LLM] [I]   rougeLsum : 10.437959123452638
+```
+1.3B
+```
+[09/20/2023-03:19:07] [TRT-LLM] [I] TensorRT-LLM (total latency: 9.21572732925415 sec)
+[09/20/2023-03:19:07] [TRT-LLM] [I] TensorRT-LLM beam 0 result
+[09/20/2023-03:19:07] [TRT-LLM] [I]   rouge1 : 14.86201096912762
+[09/20/2023-03:19:07] [TRT-LLM] [I]   rouge2 : 2.8026336944750434
+[09/20/2023-03:19:07] [TRT-LLM] [I]   rougeL : 12.546048137123414
+[09/20/2023-03:19:07] [TRT-LLM] [I]   rougeLsum : 13.450615751879615
+[09/20/2023-03:19:07] [TRT-LLM] [I] Hugging Face (total latency: 19.304476976394653 sec)
+[09/20/2023-03:19:07] [TRT-LLM] [I] HF beam 0 result
+[09/20/2023-03:19:07] [TRT-LLM] [I]   rouge1 : 16.849348629816337
+[09/20/2023-03:19:07] [TRT-LLM] [I]   rouge2 : 3.403001301754608
+[09/20/2023-03:19:07] [TRT-LLM] [I]   rougeL : 12.892710146409058
+[09/20/2023-03:19:07] [TRT-LLM] [I]   rougeLsum : 14.695898263141338
+```
+
 ### Speed-up Ratio
 For Galactica-125M, the speed-up is 2.885 on A10 Ali cloud machine.
 ```
@@ -233,5 +265,19 @@ Hugging Face (total latency: 10.588122367858887 sec)
 For Galactica-1.3B, the speed-up is 1.387 on A10 Ali cloud machine, when fmha is enabled.
 
 **Conclusion:Compared to No FMHA, there is a subtle improvement without much performance drop or accuracy loss.**
+
+#### Enable fmha and weight_only
+For Galactica-125M, the speed-up is 3.862 on A10 Ali cloud machine, when fmha is enabled.
+```
+TensorRT-LLM (total latency: 2.7617087364196777 sec)
+Hugging Face (total latency: 10.66635537147522 sec)
+```
+
+For Galactica-1.3B, the speed-up is 2.095 on A10 Ali cloud machine, when fmha is enabled.
+```
+TensorRT-LLM (total latency: 9.21572732925415 sec)
+Hugging Face (total latency: 19.304476976394653 sec)
+```
+
 ### Future Work
 Currently, I am not capable of and lack time of debugging the way as those scripts in [**tests**](../../tests/model/test_gpt_e2e.py) dir 

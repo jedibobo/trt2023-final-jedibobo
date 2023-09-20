@@ -12,7 +12,8 @@ from tensorrt_llm.builder import Builder
 from tensorrt_llm.logger import logger
 from tensorrt_llm.network import net_guard
 from tensorrt_llm.plugin.plugin import ContextFMHAType
-
+from tensorrt_llm.models import weight_only_quantize
+from tensorrt_llm.quantization import QuantMode
 from weight import load_from_ft, parse_ft_config, load_from_hf_galai  # isort:skip
 
 MODEL_NAME = "galactica"
@@ -103,6 +104,24 @@ def parse_arguments():
     parser.add_argument('--remove_input_padding',
                         default=False,
                         action='store_true')
+    parser.add_argument(
+        '--use_weight_only',
+        default=False,
+        action="store_true",
+        help='Quantize weights for the various GEMMs to INT4/INT8.'
+        'See --weight_only_precision to set the precision')
+
+    parser.add_argument(
+        '--weight_only_precision',
+        const='int8',
+        type=str,
+        nargs='?',
+        default='int8',
+        choices=['int8', 'int4'],
+        help=
+        'Define the precision for the weights when using weight-only quantization.'
+        'You must also use --use_weight_only for that argument to have an impact.'
+    )
 
     args = parser.parse_args()
     if args.model_dir is not None:
@@ -145,6 +164,13 @@ def build_rank_engine(builder: Builder,
         tensor_parallel_group=list(range(args.world_size)),  # TP only
         pre_norm=args.pre_norm,
         do_layer_norm_before=args.do_layer_norm_before)
+    if args.use_weight_only and args.weight_only_precision == 'int8':
+        tensorrt_llm_gpt = weight_only_quantize(tensorrt_llm_gpt,
+                                                  QuantMode.use_weight_only())
+    elif args.use_weight_only and args.weight_only_precision == 'int4':
+        tensorrt_llm_gpt = weight_only_quantize(
+            tensorrt_llm_gpt,
+            QuantMode.use_weight_only(use_int4_weights=True))
     if args.hf_model_dir is not None:
         from transformers import AutoTokenizer, AutoModelForCausalLM
         hf_galai = AutoModelForCausalLM.from_pretrained(args.hf_model_dir, device_map="auto", torch_dtype='auto')
@@ -167,6 +193,9 @@ def build_rank_engine(builder: Builder,
             args.use_gpt_attention_plugin)
     if args.use_gemm_plugin:
         network.plugin_config.set_gemm_plugin(args.use_gemm_plugin)
+    if args.use_weight_only:
+        network.plugin_config.set_weight_only_quant_matmul_plugin(
+            dtype='float16')
     if args.use_layernorm_plugin:
         network.plugin_config.set_layernorm_plugin(args.use_layernorm_plugin)
     assert not (args.enable_context_fmha and args.enable_context_fmha_fp32_acc)

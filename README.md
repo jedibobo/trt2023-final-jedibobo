@@ -76,7 +76,7 @@ vocabulary was generated from a randomly selected 2% subset of the training data
 - 使用了BPE词表
 
 ### 优化效果
-在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。
+在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。在开启FMHA和weight_only下，分别加速** **和** **
 具体的优化和输出结果的复现过程，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
 ### 在docker里编译运行的完整步骤
 有些部分需要科学上网，因此我这边需要**两个** 命令行
@@ -101,6 +101,7 @@ sh build_and_run_125m.sh #or sh build_and_run_1.3b.sh
 
 ### 开发工作的难点
 开发中主要攻克的问题：
+- 适配了Galactica模型的weight_only模式，以及对应的build.py和weight.py
 - 搞清楚OPT和Galactica的区别，主要在于激活函数、模型参数、无BIAS结构、加载模型参数的方式。
 - 参考LLAMA直接从hf读取模型的方式，编写了独立的[加载参数代码](tensorrt_llm_july-release-v1/examples/galactica/weight.py)，对BIAS全为0的模型特性加以适配。以及利用加载参数函数，编写对应的build.py中的参数加载部分。
 - 参考OPT通过FT格式加载模型参数的流程，借助了其中的config.ini配置文件，成功对模型进行了正确的初始化。

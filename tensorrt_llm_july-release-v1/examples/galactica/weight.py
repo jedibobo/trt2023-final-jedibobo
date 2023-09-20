@@ -188,7 +188,7 @@ def load_from_hf_galai(tensorrt_llm_galai,
                     dst.value = processed_torch_weights.view(
                         dtype=torch.float32).numpy()
                     scales = tensorrt_llm_galai.layers[
-                        idx].mlp.gate.per_channel_scale
+                        idx].mlp.fc.per_channel_scale
                     scales.value = torch_weight_scales.numpy()
                 else:
                     dst.value = np.ascontiguousarray(split_v)
