@@ -156,7 +156,7 @@ FT流程其实不太友好和直接，代码在[code](tensorrt_llm_july-release-
 
 ## 优化效果
 &emsp;在A10阿里云服务器里运行，使用FP16精度对于Galactica-125M和1.3B参数的两个模型在summarize任务中，分别加速**2.885**和**1.314**倍。在开启FMHA，且无明显精度下降的情况下，分别加速**3.166**和**1.387**倍。在开启FMHA和weight_only下，分别加速**3.862**和**2.095**倍。其中1.3B模型在FMHA和weight_only下，rough score与HFmodel的差距大于1，属于有一定精度损失的情况。
-具体结果可见：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
+具体结果可见：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md#speed-up-ratio)
 
 速度和精度(Rouge1 Score Diff)汇总表格如下：
 
@@ -191,7 +191,7 @@ FT流程其实不太友好和直接，代码在[code](tensorrt_llm_july-release-
 | fp16+FMHA(torch.fp16)  | 13.768/28.925  | 3.808 |
 | fp16+FMHA+Weight_Only(torch.fp16)  | 9.889/32.826  | 2.410 |
 
-&emsp;从nvidia-smi看，bs增大能显著增加GPU的利用率。具体的优化和输出结果的复现过程，也可以参照：[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md)
+&emsp;从nvidia-smi看，bs增大能显著增加GPU的利用率。
 
 
 
@@ -222,8 +222,6 @@ python3 summarize.py --engine_dir=trt_engine/gpt2/fp16/1-gpu --test_hf
 [08/17/2023-07:32:10] [TRT-LLM] [I]   rougeL : 14.851620358520162
 [08/17/2023-07:32:10] [TRT-LLM] [I]   rougeLsum : 16.95757748412272
 ```
-
-
 
 ## 经验与体会
 &emsp;比赛内容方面：这算本人第三年参加Hackathon了，每一年的难度都肉眼可见增加。但目前还和我本人代码能力的提升在一个相对平衡的状态，感觉自己也在不断进步，虽然速度不够快，但我认为是在平时工作学习没用上TRT，因此对业务流程不是那么熟悉。举个例子，上年第一的ching大佬，这次比我初赛高了不超500分（虽然人家最后3天搞定的），上年基本是我分数的5倍还要多。今年也在群里看着大佬们的讨论，尤其是Tlntin大佬的开源精神，让我深感佩服。还要感谢群里帮我解决问题的各位nv专家，帮我及时指出问题和答疑解惑，以及鼓励和帮助我提高。
