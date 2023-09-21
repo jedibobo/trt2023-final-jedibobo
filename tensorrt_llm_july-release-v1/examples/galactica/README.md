@@ -72,7 +72,7 @@ cp -r tensorrt_llm_july-release-v1/tensorrt_llm/models/__init__.py /usr/local/li
 **Note**: this method will temporarily solve the module not found issue, I tried to rebuild trt_llm, but got a few problems to be solved.
 
 
-when you see the following lines in CLI, you can proceed on [building model](#steps-to-build-and-run-summarization).
+When you finish these, you can proceed on [building model](#steps-to-build-and-run-summarization).
 ```shell
 Successfully installed tensorrt-llm-0.1.3
 ```
