@@ -54,6 +54,7 @@ which add bos_token, eos_token and pad_token when using summarize.py. (In fact, 
 
 ### Install Necessary Python Package
 ```shell
+cd trt2023-final-jedibobo/tensorrt_llm_july-release-v1/examples/galactica
 pip install -r requirements.txt
 ```
 
@@ -63,19 +64,16 @@ Otherwise will prompt this error:
   File "/root/workspace/trt2023-final-jedibobo/tensorrt_llm_july-release-v1/examples/galactica/weight.py", line 9, in <module>
     from tensorrt_llm.models import GALAILMHeadModel
 ```
-Update the TRT_LLM pip package by:
+Copy Modified Files to:
 ```shell
-cd trt2023-final-jedibobo/tensorrt_llm_july-release-v1/
-pip install -e .
+cp -r tensorrt_llm_july-release-v1/tensorrt_llm/models/galactica /usr/local/lib/python3.8/dist-packages/tensorrt_llm/models/
+cp -r tensorrt_llm_july-release-v1/tensorrt_llm/models/__init__.py /usr/local/lib/python3.8/dist-packages/tensorrt_llm/models/__init__.py
 ```
+**Note**: this method will temporarily solve the module not found issue, I tried to rebuild trt_llm, but got a few problems to be solved.
+
+
 when you see the following lines in CLI, you can proceed on [building model](#steps-to-build-and-run-summarization).
 ```shell
-Installing collected packages: tensorrt-llm
-  Attempting uninstall: tensorrt-llm
-    Found existing installation: tensorrt-llm 0.1.3
-    Uninstalling tensorrt-llm-0.1.3:
-      Successfully uninstalled tensorrt-llm-0.1.3
-  Running setup.py develop for tensorrt-llm
 Successfully installed tensorrt-llm-0.1.3
 ```
 
