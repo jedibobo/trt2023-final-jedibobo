@@ -180,6 +180,22 @@ sh build_and_run_125m_enable_fmha_weightonly.sh
 # or sh build_and_run_1.3b_enable_fmha_weightonly.sh
 ```
 
+Generation Task:
+```shell
+python3 run.py --max_output_len=400 --tokenizer_dir galactica-125m/ --engine_dir  trt_engine/galactica-125m/fp16/1-gpu/
+```
+
+Summarization Task:
+```shell
+python3 summarize.py --engine_dir trt_engine/galactica-125m/fp16/1-gpu \
+                     --test_hf \
+                     --batch_size 1 \
+                     --test_trt_llm \
+                     --hf_model_location ./galactica-125m/ \
+                     --data_type fp16 \
+                     --tensorrt_llm_rouge1_threshold=20 
+```
+
 ## 主要开发工作
 
 ### 开发工作的难点

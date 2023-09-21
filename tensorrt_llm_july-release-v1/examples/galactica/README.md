@@ -122,6 +122,13 @@ some keywords to mind are:
 - hidden_act gelu for all Galactica models.
 
 Finally, test model
+
+Generation Task:
+```shell
+python3 run.py --max_output_len=400 --tokenizer_dir galactica-125m/ --engine_dir  trt_engine/galactica-125m/weight_only/1-gpu/
+```
+
+Summarization Task:
 ```shell
 python3 summarize.py --engine_dir trt_engine/galactica-125m/fp16/1-gpu \
                      --test_hf \
