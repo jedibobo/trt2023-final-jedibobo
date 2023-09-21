@@ -96,7 +96,7 @@ rm -rf ./c-model/
 rm -rf ./trt_engine/
 python3 hf_galactica_convert.py -i galactica-125m \
                                 -o ./c-model/galactica-125m/fp16 \
-                                -i_g 1 -weight_data_type fp16 > hf_convert_galai_125m_ft.log 2>&1
+                                -i_g 1 -weight_data_type fp16 > hf_convert_galai_125m_ft.log 
 ```
 The previous line may generate a warning 'Some weights of OPTForCausalLM were not initialized from the model checkpoint at galactica-125m and are newly initialized: ['lm_head.weight']', I discover it is a problem of original 125m model, I save it again using this help [page](https://colab.research.google.com/drive/1hjnB9VBMnbVIJiTNdQWZbL0yIAqF75WZ?usp=sharing#scrollTo=m--OZ0l8bCQQ) and got no more **'newly initialized weight'** warning. 
 
@@ -114,7 +114,7 @@ python3 build.py --model_dir=./c-model/galactica-125m/fp16/1-gpu \
                  --world_size 1 \
                  --output_dir trt_engine/galactica-125m/fp16/1-gpu \
                  --pre_norm \
-                 --hidden_act gelu > build.log 2>&1
+                 --hidden_act gelu > build.log
 ```
 
 some keywords to mind are:
