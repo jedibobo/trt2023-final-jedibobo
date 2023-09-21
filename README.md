@@ -78,6 +78,85 @@ vocabulary was generated from a randomly selected 2% subset of the training data
 
 ### 项目如何setup
 详细见[Galactica-README](tensorrt_llm_july-release-v1/examples/galactica/README.md#setup-envinstall-requirements-and-prepare-model)
+
+### Setup Env(Install Requirements and Prepare model)
+#### 获取docker image
+```shell
+docker pull registry.cn-hangzhou.aliyuncs.com/trt-hackathon/trt-hackathon:final_v1
+docker run  -it --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 --network host --name hackathon2023  registry.cn-hangzhou.aliyuncs.com/trt-hackathon/trt-hackathon:final_v1 bash
+```
+#### install git lfs in docker
+```shell
+curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash 
+# no need sudo in docker with root user
+apt-get install git-lfs
+```
+#### clone this repository
+```shell
+git clone https://github.com/jedibobo/trt2023-final-jedibobo.git
+```
+
+
+#### clone model from huggingface for 125m model
+```shell
+cd trt2023-final-jedibobo/tensorrt_llm_july-release-v1/examples/galactica
+git lfs install # make sure git lfs is installed using apt
+git clone https://huggingface.co/facebook/galactica-125m
+```
+Then, change the tokenizer_config.json file with the following:
+```json
+{
+  "name_or_path": "/content/tokenizer",
+  "special_tokens_map_file": "/content/tokenizer/special_tokens_map.json",
+  "tokenizer_class": "PreTrainedTokenizerFast",
+  "bos_token": {
+    "__type": "AddedToken",
+    "content": "<s>",
+    "lstrip": false,
+    "normalized": true,
+    "rstrip": false,
+    "single_word": false
+  },
+  "eos_token": {
+  "__type": "AddedToken",
+  "content": "</s>",
+  "lstrip": false,
+  "normalized": true,
+  "rstrip": false,
+  "single_word": false
+  },
+  "pad_token": null
+}
+```
+which add bos_token, eos_token and pad_token when using summarize.py. (In fact, bos_token is not necessary.)
+
+#### Install Necessary Python Package
+```shell
+pip install -r requirements.txt
+```
+
+#### update tensorrt_llm package modified by the author(me)
+Otherwise will prompt this error:
+```shell
+  File "/root/workspace/trt2023-final-jedibobo/tensorrt_llm_july-release-v1/examples/galactica/weight.py", line 9, in <module>
+    from tensorrt_llm.models import GALAILMHeadModel
+```
+Update the TRT_LLM pip package by:
+```shell
+cd trt2023-final-jedibobo/tensorrt_llm_july-release-v1/
+pip install -e .
+```
+when you see the following lines in CLI, you can proceed on [building model](#steps-to-build-and-run-summarization).
+```shell
+Installing collected packages: tensorrt-llm
+  Attempting uninstall: tensorrt-llm
+    Found existing installation: tensorrt-llm 0.1.3
+    Uninstalling tensorrt-llm-0.1.3:
+      Successfully uninstalled tensorrt-llm-0.1.3
+  Running setup.py develop for tensorrt-llm
+Successfully installed tensorrt-llm-0.1.3
+```
+
 ### 在docker里编译运行的完整步骤
 &emsp;有些部分需要科学上网，因此我这边需要**两个**命令行
 #### 命令行1

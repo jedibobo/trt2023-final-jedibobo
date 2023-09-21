@@ -13,6 +13,11 @@ curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.s
 # no need sudo in docker with root user
 apt-get install git-lfs
 ```
+### clone this repository
+```shell
+git clone https://github.com/jedibobo/trt2023-final-jedibobo.git
+```
+
 
 ### clone model from huggingface for 125m model
 ```shell
